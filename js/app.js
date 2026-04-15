@@ -37,7 +37,6 @@ const STATUS_BITS = [
 ];
 
 let reg = 'error';
-let mode = 'decode';
 let value = 0;
 
 function getBits() {
@@ -49,23 +48,8 @@ function switchReg(r) {
     value = 0;
     document.getElementById('tab-error').classList.toggle('active', r === 'error');
     document.getElementById('tab-status').classList.toggle('active', r === 'status');
-    if (mode === 'decode') {
-        document.getElementById('val-input').value = '';
-    }
+    document.getElementById('val-input').value = '';
     document.getElementById('parse-err').textContent = '';
-    resetSummary();
-    render();
-}
-
-function switchMode(m) {
-    mode = m;
-    document.getElementById('mb-decode').classList.toggle('active', m === 'decode');
-    document.getElementById('mb-build').classList.toggle('active', m === 'build');
-    document.getElementById('decode-panel').style.display = m === 'decode' ? '' : 'none';
-    if (m === 'decode') {
-        document.getElementById('val-input').value = '';
-        value = 0;
-    }
     resetSummary();
     render();
 }
@@ -100,9 +84,7 @@ function onInput() {
 
 function toggleBit(i) {
     value ^= (1 << i);
-    if (mode === 'decode') {
-        document.getElementById('val-input').value = value === 0 ? '' : String(value);
-    }
+    document.getElementById('val-input').value = value === 0 ? '' : String(value);
     resetSummary();
     render();
 }
@@ -228,5 +210,4 @@ function copySummary() {
     });
 }
 
-switchMode('decode');
 render();
