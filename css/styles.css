@@ -5,18 +5,21 @@
     --border-radius-lg: 8px;
     
     --color-background-primary: #ffffff;
-    --color-background-secondary: #f5f6f7;
-    --color-background-tertiary: #e8eaed;
-    --color-text-primary: #202124;
-    --color-text-secondary: #5f6368;
-    --color-text-tertiary: #9aa0a6;
-    --color-text-danger: #d93025;
-    --color-text-info: #1a73e8;
-    --color-border-primary: #dadce0;
-    --color-border-secondary: #c0c0c0;
-    --color-border-tertiary: #d2d2d2;
-    --color-border-info: #1a73e8;
-    --color-background-info: #e8f0fe;
+    --color-background-secondary: #f0f7fa;
+    --color-background-tertiary: #e3f2fd;
+    --color-text-primary: #1a3a4a;
+    --color-text-secondary: #546e7a;
+    --color-text-tertiary: #78909c;
+    --color-text-danger: #d32f2f;
+    --color-text-info: #0277bd;
+    --color-border-primary: #b0bec5;
+    --color-border-secondary: #90a4ae;
+    --color-border-tertiary: #cfd8dc;
+    --color-border-info: #0277bd;
+    --color-background-info: #e1f5fe;
+    --color-accent-primary: #0288d1;
+    --color-accent-light: #4fc3f7;
+    --color-accent-teal: #00897b;
 }
 
 * {
@@ -27,14 +30,14 @@
 
 body {
     font-family: var(--font-sans);
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #e0f7fa 0%, #f8f9fa 50%, #e8f5e9 100%);
     color: var(--color-text-primary);
     line-height: 1.5;
     min-height: 100vh;
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 1rem;
 }
@@ -42,17 +45,21 @@ body {
 header {
     text-align: center;
     margin-bottom: 1.5rem;
+    background: linear-gradient(90deg, #01579b, #0277bd);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 header h1 {
     font-size: 1.75rem;
     font-weight: 600;
-    color: var(--color-text-primary);
+    color: #ffffff;
     margin-bottom: 0.5rem;
 }
 
 header p {
-    color: var(--color-text-secondary);
+    color: #b3e5fc;
     font-size: 0.95rem;
 }
 
@@ -61,33 +68,40 @@ main {
     border-radius: var(--border-radius-lg);
     padding: 1.25rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-top: 4px solid var(--color-accent-primary);
 }
 
 .tabs {
     display: flex;
     gap: 0;
-    border-bottom: 1px solid var(--color-border-tertiary);
+    border-bottom: 2px solid var(--color-border-tertiary);
     margin-bottom: 1.25rem;
 }
 
 .tab {
-    padding: 8px 18px;
+    padding: 10px 20px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
     border-bottom: none;
     border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
     color: var(--color-text-secondary);
-    background: transparent;
+    background: #eceff1;
     transition: all 0.15s;
+    margin-bottom: 2px;
+}
+
+.tab:hover {
+    background: #cfd8dc;
 }
 
 .tab.active {
-    background: var(--color-background-primary);
+    background: linear-gradient(180deg, #039be5, #0288d1);
     border-color: var(--color-border-tertiary);
-    color: var(--color-text-primary);
-    margin-bottom: -1px;
+    color: #ffffff;
+    margin-bottom: 0;
+    box-shadow: 0 -2px 4px rgba(2, 136, 209, 0.3);
 }
 
 .mode-row {
@@ -135,6 +149,7 @@ main {
 .input-row input:focus {
     outline: none;
     border-color: var(--color-border-info);
+    box-shadow: 0 0 0 2px rgba(2, 135, 209, 0.2);
 }
 
 .input-row input::placeholder {
@@ -156,9 +171,10 @@ main {
 }
 
 .vcard {
-    background: var(--color-background-secondary);
+    background: linear-gradient(180deg, #f5f5f5, #eeeeee);
     border-radius: var(--border-radius-md);
     padding: 0.65rem 0.85rem;
+    border-left: 3px solid #0288d1;
 }
 
 .vcard-label {
@@ -248,11 +264,14 @@ main {
 }
 
 .section-label {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-    margin-bottom: 6px;
-    letter-spacing: 0.04em;
+    font-size: 12px;
+    color: #0277bd;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
+    font-weight: 600;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #b3e5fc;
 }
 
 .active-list {
@@ -307,26 +326,29 @@ main {
 }
 
 .clear-btn {
-    padding: 5px 12px;
+    padding: 6px 14px;
     font-size: 12px;
     cursor: pointer;
-    border: 1px solid var(--color-border-secondary);
+    border: 1px solid #78909c;
     border-radius: var(--border-radius-md);
-    background: transparent;
-    color: var(--color-text-secondary);
-    transition: background 0.15s;
+    background: #78909c;
+    color: #ffffff;
+    font-weight: 500;
+    transition: all 0.15s;
 }
 
 .clear-btn:hover {
-    background: var(--color-background-secondary);
+    background: #546e7a;
+    box-shadow: 0 2px 4px rgba(84, 110, 122, 0.3);
 }
 
 .summary-box {
     margin-top: 1.25rem;
-    border: 1px solid var(--color-border-secondary);
+    border: 1px solid #b0bec5;
     border-radius: var(--border-radius-lg);
     padding: 1rem 1.1rem;
-    background: var(--color-background-primary);
+    background: linear-gradient(180deg, #fafafa, #f0f0f0);
+    border-left: 4px solid #0288d1;
 }
 
 .summary-header {
@@ -338,9 +360,10 @@ main {
 
 .summary-label {
     font-size: 11px;
-    color: var(--color-text-secondary);
+    color: #0277bd;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    font-weight: 600;
 }
 
 .summary-text {
@@ -357,25 +380,27 @@ main {
 }
 
 .copy-btn {
-    padding: 4px 10px;
+    padding: 4px 12px;
     font-size: 11px;
     cursor: pointer;
-    border: 1px solid var(--color-border-secondary);
+    border: 1px solid #0288d1;
     border-radius: var(--border-radius-md);
-    background: transparent;
-    color: var(--color-text-secondary);
-    transition: background 0.15s;
+    background: #0288d1;
+    color: #ffffff;
+    font-weight: 500;
+    transition: all 0.15s;
 }
 
 .copy-btn:hover {
-    background: var(--color-background-secondary);
+    background: #0277bd;
+    box-shadow: 0 2px 4px rgba(2, 136, 209, 0.3);
 }
 
 footer {
     text-align: center;
     margin-top: 1.5rem;
     padding: 1rem;
-    color: var(--color-text-secondary);
+    color: #546e7a;
     font-size: 0.85rem;
 }
 
