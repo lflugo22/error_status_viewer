@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hach Error Status Decoder</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hach Error Status Decoder</h1>
+            <p>Decode classified error and status words from Hach online analyzers</p>
+        </header>
+        
+        <main>
+            <div class="tabs">
+                <button class="tab active" id="tab-error" onclick="switchReg('error')">Error word — reg 49930</button>
+                <button class="tab" id="tab-status" onclick="switchReg('status')">Status word — reg 49931</button>
+            </div>
+            
+            <div class="mode-row">
+                <button class="mode-btn active" id="mb-decode" onclick="switchMode('decode')">Decode value</button>
+                <button class="mode-btn" id="mb-build" onclick="switchMode('build')">Build value</button>
+            </div>
+            
+            <div id="decode-panel">
+                <div class="input-row">
+                    <input id="val-input" type="text" placeholder="Decimal, 0x1A2B hex, or 0b1010 binary…" oninput="onInput()" />
+                    <button class="clear-btn" onclick="clearAll()">Clear</button>
+                </div>
+                <div class="parse-err" id="parse-err"></div>
+            </div>
+            
+            <div class="value-cards">
+                <div class="vcard">
+                    <div class="vcard-label">Decimal</div>
+                    <div class="vcard-val" id="vc-dec">0</div>
+                </div>
+                <div class="vcard">
+                    <div class="vcard-label">Hex</div>
+                    <div class="vcard-val" id="vc-hex">0x0000</div>
+                </div>
+                <div class="vcard">
+                    <div class="vcard-label">Binary</div>
+                    <div class="vcard-val" id="vc-bin">0000 0000 0000 0000</div>
+                </div>
+            </div>
+            
+            <div class="section-label">Bit map — click to toggle</div>
+            <div class="bits-grid" id="bits-grid"></div>
+            
+            <div class="section-label">Active bits</div>
+            <div class="active-list" id="active-list"></div>
+            
+            <div class="summary-box">
+                <div class="summary-header">
+                    <span class="summary-label">Summary</span>
+                </div>
+                <div class="summary-text" id="summary-text">Enter a value above to see the summary.</div>
+                <div class="copy-row">
+                    <button class="copy-btn" onclick="copySummary()">Copy</button>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Based on original Hach Error Status Decoder</p>
+        </footer>
+    </div>
+    
+    <script src="js/app.js"></script>
+</body>
+</html>

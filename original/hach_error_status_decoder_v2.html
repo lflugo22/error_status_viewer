@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hach Error Status Decoder (Original)</title>
+</head>
+<body>
+<!-- Original file content begins -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.wrap{padding:1rem 0}
+.tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.25rem}
+.tab{padding:8px 18px;font-size:14px;font-weight:500;cursor:pointer;border:0.5px solid transparent;border-bottom:none;border-radius:var(--border-radius-md) var(--border-radius-md) 0 0;color:var(--color-text-secondary);background:transparent;transition:all .15s}
+.tab.active{background:var(--color-background-primary);border-color:var(--color-border-tertiary);color:var(--color-text-primary);margin-bottom:-0.5px}
+.mode-row{display:flex;gap:8px;margin-bottom:1rem}
+.mode-btn{padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary);transition:all .15s}
+.mode-btn.active{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+.input-row{display:flex;gap:8px;align-items:center;margin-bottom:1.25rem}
+.input-row input{flex:1;padding:7px 10px;font-size:14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.input-row input:focus{outline:none;border-color:var(--color-border-info)}
+.parse-err{font-size:12px;color:var(--color-text-danger);margin-bottom:.75rem;min-height:16px}
+.value-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:1.25rem}
+.vcard{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.65rem .85rem}
+.vcard-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.vcard-val{font-size:15px;font-weight:500;color:var(--color-text-primary);font-family:var(--font-mono);word-break:break-all}
+.bits-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin-bottom:1.25rem}
+.bit-cell{position:relative;cursor:pointer;border-radius:6px;border:0.5px solid var(--color-border-tertiary);padding:5px 3px;text-align:center;background:var(--color-background-primary);transition:all .12s}
+.bit-cell.on{background:var(--color-background-info);border-color:var(--color-border-info)}
+.bit-cell.on .bit-num{color:var(--color-text-info)}
+.bit-cell.on .bit-sq{background:#378ADD;border-color:#1a6caa}
+.bit-num{font-size:10px;color:var(--color-text-secondary);margin-bottom:3px;font-family:var(--font-mono)}
+.bit-sq{width:18px;height:18px;border-radius:3px;background:var(--color-background-tertiary);margin:0 auto;border:0.5px solid var(--color-border-tertiary)}
+.bit-tooltip{position:absolute;z-index:99;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:6px 9px;font-size:11px;white-space:nowrap;pointer-events:none;color:var(--color-text-primary);display:none}
+.bit-cell:hover .bit-tooltip{display:block}
+.section-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.active-list{display:flex;flex-direction:column;gap:6px}
+.active-item{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);border-left:3px solid #378ADD}
+.active-item.warn{border-left-color:#EF9F27}
+.active-item.err{border-left-color:#E24B4A}
+.ai-bit{font-size:11px;font-weight:500;color:var(--color-text-secondary);font-family:var(--font-mono);min-width:26px;margin-top:1px}
+.ai-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.ai-desc{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.none-msg{font-size:13px;color:var(--color-text-secondary);padding:.5rem 0}
+.clear-btn{padding:5px 12px;font-size:12px;cursor:pointer;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary)}
+.clear-btn:hover{background:var(--color-background-secondary)}
+.summary-box{margin-top:1.25rem;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:1rem 1.1rem;background:var(--color-background-primary)}
+.summary-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+.summary-label{font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em}
+.summary-gen-btn{padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-md);background:var(--color-background-info);color:var(--color-text-info)}
+.summary-gen-btn:disabled{opacity:.5;cursor:default}
+.summary-text{font-size:13px;color:var(--color-text-primary);line-height:1.6;min-height:2.5rem}
+.summary-text.loading{color:var(--color-text-secondary);font-style:italic}
+.copy-row{display:flex;justify-content:flex-end;margin-top:.6rem}
+.copy-btn{padding:4px 10px;font-size:11px;cursor:pointer;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary)}
+.copy-btn:hover{background:var(--color-background-secondary)}
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">Hach Classified Error/Status Word Decoder with AI plain-English summary</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchReg('error')">Error word — reg 49930</button>
+  <button class="tab" onclick="switchReg('status')">Status word — reg 49931</button>
+</div>
+
+<div class="mode-row">
+  <button class="mode-btn active" id="mb-decode" onclick="switchMode('decode')">Decode value</button>
+  <button class="mode-btn" id="mb-build" onclick="switchMode('build')">Build value</button>
+</div>
+
+<div id="decode-panel">
+  <div class="input-row">
+    <input id="val-input" type="text" placeholder="Decimal, 0x1A2B hex, or 0b1010 binary…" oninput="onInput()" />
+    <button class="clear-btn" onclick="clearAll()">Clear</button>
+  </div>
+  <div class="parse-err" id="parse-err"></div>
+</div>
+
+<div class="value-cards">
+  <div class="vcard"><div class="vcard-label">Decimal</div><div class="vcard-val" id="vc-dec">0</div></div>
+  <div class="vcard"><div class="vcard-label">Hex</div><div class="vcard-val" id="vc-hex">0x0000</div></div>
+  <div class="vcard"><div class="vcard-label">Binary</div><div class="vcard-val" id="vc-bin">0000 0000 0000 0000</div></div>
+</div>
+
+<div class="section-label">Bit map — click to toggle</div>
+<div class="bits-grid" id="bits-grid"></div>
+
+<div class="section-label" style="margin-top:.25rem">Active bits</div>
+<div class="active-list" id="active-list"></div>
+
+<div class="summary-box" id="summary-box">
+  <div class="summary-header">
+    <span class="summary-label">Plain-English summary</span>
+    <button class="summary-gen-btn" id="gen-btn" onclick="generateSummary()">Generate summary</button>
+  </div>
+  <div class="summary-text" id="summary-text" style="color:var(--color-text-tertiary);font-style:italic">Set or decode a value above, then click Generate summary.</div>
+  <div class="copy-row" id="copy-row" style="display:none">
+    <button class="copy-btn" onclick="copySummary()">Copy</button>
+  </div>
+</div>
+</div>
+
+<script>
+const ERROR_BITS=[
+  {n:"Calibration error",d:"Faulty calibration detected",t:"err"},
+  {n:"Electronic settings error",d:"Faulty electronic calibration/settings",t:"err"},
+  {n:"Cleaning error",d:"Error in cleaning cycle detected",t:"err"},
+  {n:"Measuring module error",d:"Error in measuring module detected",t:"err"},
+  {n:"System initialization",d:"Inconsistent settings detected, reset to factory settings",t:"err"},
+  {n:"Hardware error",d:"Faulty hardware detected",t:"err"},
+  {n:"Internal communication error",d:"Internal communication error detected",t:"err"},
+  {n:"Humidity error",d:"Excessive humidity detected",t:"err"},
+  {n:"Excessive temperature",d:"Excessive temperature detected",t:"err"},
+  {n:"(Reserved)",d:"Bit 9 — not assigned",t:""},
+  {n:"Sample feed warning",d:"Error in sample feed detected",t:"warn"},
+  {n:"Questionable calibration warning",d:"Accuracy of previous calibration inadequate",t:"warn"},
+  {n:"Questionable measurement warning",d:"Accuracy of previous measurement inadequate/out of range",t:"warn"},
+  {n:"Safety warning",d:"Safety equipment error detected",t:"warn"},
+  {n:"Reagent warning",d:"Reagent warning, fill level below minimum detected",t:"warn"},
+  {n:"Service request warning",d:"Service request detected",t:"warn"}
+];
+const STATUS_BITS=[
+  {n:"Calibration activated",d:"Calibration in progress, measurement value not up to date",t:"warn"},
+  {n:"Cleaning activated",d:"Cleaning in progress, measurement value not up to date",t:"warn"},
+  {n:"Service mode activated",d:'Device in "Service" mode, measurement value not up to date',t:"warn"},
+  {n:"General error message",d:"General error detected, refer to error text for details",t:"err"},
+  {n:"Ch0 — poor quality",d:"Measurement accuracy is not within specified limits",t:"warn"},
+  {n:"Ch0 — range short-fall",d:"Measurement value falls short of the specified range",t:"warn"},
+  {n:"Ch0 — range exceeded",d:"Measurement value exceeds the specified range",t:"err"},
+  {n:"Ch1 — poor quality",d:"Measurement accuracy is not within specified limits",t:"warn"},
+  {n:"Ch1 — range short-fall",d:"Measurement value falls short of the specified range",t:"warn"},
+  {n:"Ch1 — range exceeded",d:"Measurement value exceeds the specified range",t:"err"},
+  {n:"Ch2 — poor quality",d:"Measurement accuracy is not within specified limits",t:"warn"},
+  {n:"Ch2 — range short-fall",d:"Measurement value falls short of the specified range",t:"warn"},
+  {n:"Ch2 — range exceeded",d:"Measurement value exceeds the specified range",t:"err"},
+  {n:"Ch3 — poor quality",d:"Measurement accuracy is not within specified limits",t:"warn"},
+  {n:"Ch3 — range short-fall",d:"Measurement value falls short of the specified range",t:"warn"},
+  {n:"Ch3 — range exceeded",d:"Measurement value exceeds the specified range",t:"err"}
+];
+
+let reg='error',mode='decode',value=0;
+function getBits(){return reg==='error'?ERROR_BITS:STATUS_BITS;}
+
+function switchReg(r){
+  reg=r;value=0;
+  document.querySelectorAll('.tab').forEach((t,i)=>{t.classList.toggle('active',(r==='error'&&i===0)||(r==='status'&&i===1));});
+  if(mode==='decode')document.getElementById('val-input').value='';
+  document.getElementById('parse-err').textContent='';
+  resetSummary();render();
+}
+function switchMode(m){
+  mode=m;
+  document.getElementById('mb-decode').classList.toggle('active',m==='decode');
+  document.getElementById('mb-build').classList.toggle('active',m==='build');
+  document.getElementById('decode-panel').style.display=m==='decode'?'':'none';
+  if(m==='decode'){document.getElementById('val-input').value='';value=0;}
+  resetSummary();render();
+}
+function onInput(){
+  const raw=document.getElementById('val-input').value.trim();
+  const err=document.getElementById('parse-err');
+  if(!raw){value=0;err.textContent='';resetSummary();render();return;}
+  let v;
+  if(/^0x/i.test(raw))v=parseInt(raw,16);
+  else if(/^0b/i.test(raw))v=parseInt(raw.slice(2),2);
+  else v=parseInt(raw,10);
+  if(isNaN(v)||v<0||v>65535){err.textContent='Enter a value 0–65535, 0x0000–0xFFFF, or 0b…';return;}
+  err.textContent='';value=v;resetSummary();render();
+}
+function toggleBit(i){
+  value^=(1<<i);
+  if(mode==='decode'){document.getElementById('val-input').value=value===0?'':String(value);}
+  resetSummary();render();
+}
+function clearAll(){
+  value=0;
+  document.getElementById('val-input').value='';
+  document.getElementById('parse-err').textContent='';
+  resetSummary();render();
+}
+function resetSummary(){
+  document.getElementById('summary-text').textContent='Set or decode a value above, then click Generate summary.';
+  document.getElementById('summary-text').style.color='var(--color-text-tertiary)';
+  document.getElementById('summary-text').style.fontStyle='italic';
+  document.getElementById('copy-row').style.display='none';
+  document.getElementById('gen-btn').disabled=false;
+}
+
+function fmtBin(v){const s=v.toString(2).padStart(16,'0');return s.slice(0,4)+' '+s.slice(4,8)+' '+s.slice(8,12)+' '+s.slice(12);}
+function fmtHex(v){return '0x'+v.toString(16).toUpperCase().padStart(4,'0');}
+
+function getActiveItems(){
+  const bits=getBits();
+  const active=[];
+  for(let i=0;i<16;i++){if(value&(1<<i))active.push({bit:i,...bits[i]});}
+  return active.reverse();
+}
+
+function render(){
+  document.getElementById('vc-dec').textContent=value;
+  document.getElementById('vc-hex').textContent=fmtHex(value);
+  document.getElementById('vc-bin').textContent=fmtBin(value);
+  const bits=getBits();
+  const grid=document.getElementById('bits-grid');
+  grid.innerHTML='';
+  for(let i=15;i>=0;i--){
+    const on=!!(value&(1<<i));
+    const b=bits[i];
+    const cell=document.createElement('div');
+    cell.className='bit-cell'+(on?' on':'');
+    cell.onclick=()=>toggleBit(i);
+    cell.innerHTML=`<div class="bit-num">${i}</div><div class="bit-sq"></div><div class="bit-tooltip">${b.n}</div>`;
+    grid.appendChild(cell);
+  }
+  const list=document.getElementById('active-list');
+  list.innerHTML='';
+  const active=getActiveItems();
+  if(!active.length){list.innerHTML='<div class="none-msg">No bits set — value is 0x0000</div>';return;}
+  active.forEach(({bit,n,d,t})=>{
+    const item=document.createElement('div');
+    item.className='active-item'+(t==='err'?' err':t==='warn'?' warn':'');
+    item.innerHTML=`<div class="ai-bit">B${bit}</div><div><div class="ai-name">${n}</div><div class="ai-desc">${d}</div></div>`;
+    list.appendChild(item);
+  });
+}
+
+async function generateSummary(){
+  const active=getActiveItems();
+  if(!active.length){
+    document.getElementById('summary-text').textContent='No bits are active — nothing to summarize.';
+    document.getElementById('summary-text').style.color='var(--color-text-secondary)';
+    document.getElementById('summary-text').style.fontStyle='italic';
+    return;
+  }
+  const btn=document.getElementById('gen-btn');
+  btn.disabled=true;
+  const st=document.getElementById('summary-text');
+  st.textContent='Generating…';
+  st.style.color='var(--color-text-secondary)';
+  st.style.fontStyle='italic';
+  document.getElementById('copy-row').style.display='none';
+
+  const regLabel=reg==='error'?'Classified Error Word (Register 49930)':'Classified Status Word (Register 49931)';
+  const bitList=active.map(a=>`- Bit ${a.bit}: ${a.n} — ${a.d}`).join('\n');
+  const hasErr=active.some(a=>a.t==='err');
+  const hasWarn=active.some(a=>a.t==='warn');
+  const severity=hasErr?'error':hasWarn?'warning':'informational';
+
+  const prompt=`You are a technical writer for water/wastewater instrumentation systems. A Hach online analyzer has reported the following active bits in its ${regLabel}:
+
+${bitList}
+
+Write a single plain-English summary sentence (max 40 words) suitable for a SCADA alarm log or Salesforce case description. Severity level: ${severity}. Be specific, direct, and use present tense. Do not use bullet points. Do not include register numbers or bit numbers in the output. Start directly with the condition description.`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await resp.json();
+    const text=data.content?.find(c=>c.type==='text')?.text?.trim();
+    if(text){
+      st.textContent=text;
+      st.style.color='var(--color-text-primary)';
+      st.style.fontStyle='normal';
+      document.getElementById('copy-row').style.display='flex';
+    } else {
+      st.textContent='Could not generate summary — unexpected response.';
+      st.style.color='var(--color-text-danger)';
+      btn.disabled=false;
+    }
+  } catch(e){
+    st.textContent='Network error — check connection and try again.';
+    st.style.color='var(--color-text-danger)';
+    st.style.fontStyle='normal';
+    btn.disabled=false;
+  }
+}
+
+function copySummary(){
+  const text=document.getElementById('summary-text').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector('.copy-btn');
+    btn.textContent='Copied';
+    setTimeout(()=>{btn.textContent='Copy';},1500);
+  });
+}
+
+switchMode('decode');
+render();
+</script>
+<!-- Original file content ends -->
+</body>
+</html>
