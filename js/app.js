@@ -38,6 +38,9 @@ const STATUS_BITS = [
 
 let reg = 'error';
 let value = 0;
+let err_value = 0;
+let status_value = 0;
+
 
 function getBits() {
     return reg === 'error' ? ERROR_BITS : STATUS_BITS;
@@ -45,10 +48,11 @@ function getBits() {
 
 function switchReg(r) {
     reg = r;
-    value = 0;
+    value = reg === 'error' ? err_value : status_value;
+    //value = 0;
     document.getElementById('tab-error').classList.toggle('active', r === 'error');
     document.getElementById('tab-status').classList.toggle('active', r === 'status');
-    document.getElementById('val-input').value = '';
+    document.getElementById('val-input').value = value === 0 ? '' : String(value);
     document.getElementById('parse-err').textContent = '';
     resetSummary();
     render();
@@ -78,6 +82,11 @@ function onInput() {
     }
     err.textContent = '';
     value = v;
+    if (reg === 'error') {
+        err_value = value;
+    } else {
+        status_value = value;
+    }
     resetSummary();
     render();
 }
@@ -91,6 +100,8 @@ function toggleBit(i) {
 
 function clearAll() {
     value = 0;
+    err_value = 0;
+    status_value = 0;
     document.getElementById('val-input').value = '';
     document.getElementById('parse-err').textContent = '';
     resetSummary();
