@@ -93,6 +93,11 @@ function onInput() {
 
 function toggleBit(i) {
     value ^= (1 << i);
+    if (reg === 'error') {
+        err_value = value;
+    } else {
+        status_value = value;
+    }
     document.getElementById('val-input').value = value === 0 ? '' : String(value);
     resetSummary();
     render();
